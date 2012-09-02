@@ -1,6 +1,5 @@
 package com.rxp.transactionmonitor;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,6 +13,7 @@ public class Main extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
+		/*
 		GCMRegistrar.checkDevice(this);
 		GCMRegistrar.checkManifest(this);
 		final String regId = GCMRegistrar.getRegistrationId(this);
@@ -22,5 +22,7 @@ public class Main extends Activity {
 		} else {
 		  Log.v("Realex Transaction Monitor", "Already registered");
 		}
+		*/
+		
 	}
 }
