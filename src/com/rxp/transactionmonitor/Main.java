@@ -13,6 +13,7 @@ import net.oauth.OAuthAccessor;
 import net.oauth.OAuthConsumer;
 import net.oauth.OAuthException;
 import net.oauth.OAuthMessage;
+import net.oauth.OAuthProblemException;
 import net.oauth.OAuthServiceProvider;
 import net.oauth.client.OAuthClient;
 import net.oauth.client.httpclient4.HttpClient4;
@@ -32,6 +33,7 @@ import android.util.Log;
 import android.widget.TextView;
 
 import com.rxp.realcontrol.api.Client;
+import com.rxp.realcontrol.api.ClientAccounts;
 
 public class Main extends Activity {
 	private static final String requestToken = "https://api.realexpayments.com/IPS-Reporting/oauth/request_token";
@@ -203,7 +205,9 @@ public class Main extends Activity {
 			    edit.putString("access_token", accessor.accessToken);
 			    edit.putString("access_secret", accessor.tokenSecret);
 			    edit.commit();
-			    
+			    new RetrieveRequestTokenTask().execute("");
+				return null;
+				
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -241,6 +245,13 @@ public class Main extends Activity {
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+			} catch (OAuthProblemException e) {
+				Log.w("TMS", "Credentials no longer valid - reauthenticate and authorise...");
+				Editor edit = preferences.edit();
+			    edit.clear(); // wipe the stored credentials
+			    edit.commit();
+			    
+			    
 			} catch (OAuthException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -302,21 +313,21 @@ public class Main extends Activity {
 			return null;
 	    }
 
-	        protected void onPostExecute(String clientXML) {
-	        	Log.d("TMS", "In onPoseExecute: " + clientXML);
-//	        	
-//	        	Serializer serializer = new Persister();       
-//	        	Reader reader = new StringReader(clientXML);
-//	        	Client client = null;
-//	        	try {
-//					client = serializer.read(Client.class, reader, false);
-//				} catch (Exception e) {
-//					Log.e("TMS", "Crud! " + e.getLocalizedMessage());
-//				}
-//	        	Log.d("TMS", "Got Client: " + client.companyName);
-//
+	        protected void onPostExecute(String accountsXML) {
+	        	//Log.d("TMS", "In onPostExecute: " + accountsXML);
+        	
+	        	Serializer serializer = new Persister();       
+	        	Reader reader = new StringReader(accountsXML);
+	        	ClientAccounts ca = null;
+	        	try {
+					ca = serializer.read(ClientAccounts.class, reader, false);
+				} catch (Exception e) {
+					Log.e("TMS", "Crud! " + e.getLocalizedMessage());
+				}
+	        	Log.d("TMS", "Got Client: " + ca.account.get(0).accountName);
+
 	        	TextView tvAccounts = (TextView) findViewById(R.id.transactions);
-	            tvAccounts.setText(clientXML);
+	            tvAccounts.setText(ca.account.get(0).accountName);
 	    }
 	 }
 
