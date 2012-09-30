@@ -1,9 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout android:id="@+id/LinearLayout01" android:layout_width="fill_parent"
-	 android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android">
+<LinearLayout android:id="@+id/LinearLayout01" android:layout_width="fill_parent" android:orientation="vertical"
+     android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android">
 
-<com.rxp.transactionmonitor.views.RTMListItemView
+    <TextView
+        android:id="@+id/clientId"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="TextView" />
+
+    <TextView
+        android:id="@+id/transactions"
+        android:layout_width="match_parent"
+        android:layout_height="308dp"
+        android:text="sd"
+        android:textColor="#000000" />
+
+    <com.rxp.transactionmonitor.views.RTMListItemView
 	android:id="@+id/liv"
 	android:layout_width="0dip"
 	android:layout_height="fill_parent"
@@ -11,4 +24,10 @@
 	android:focusableInTouchMode="true"
 	android:layout_weight="1"/>
 
+    
+    <com.rxp.transactionmonitor.views.RTMListItemView
+        android:id="@+id/rTMListItemView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+ 
 </LinearLayout>
