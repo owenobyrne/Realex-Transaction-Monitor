@@ -1,5 +1,13 @@
 package com.rxp.transactionmonitor;
 
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import net.oauth.OAuth;
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthConsumer;
@@ -13,12 +21,19 @@ import net.oauth.client.httpclient4.HttpClient4;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.util.Log;
+import android.widget.TextView;
+
 import com.rxp.realcontrol.api.Client;
 import com.rxp.realcontrol.api.ClientAccounts;
-import com.rxp.transactionmonitor.Main.ClientTask;
-import com.rxp.transactionmonitor.Main.RetrieveRequestTokenTask;
-import com.rxp.transactionmonitor.Main.SwapForAccessTokenTask;
-import com.rxp.transactionmonitor.Main.TransactionsTask;
 
 public class Main extends Activity {
 	private static final String requestToken = "https://api.realexpayments.com/IPS-Reporting/oauth/request_token";
