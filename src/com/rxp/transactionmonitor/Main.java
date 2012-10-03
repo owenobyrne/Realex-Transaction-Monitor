@@ -34,6 +34,7 @@ import android.widget.TextView;
 
 import com.rxp.realcontrol.api.Client;
 import com.rxp.realcontrol.api.ClientAccounts;
+import com.rxp.realcontrol.api.Transactions;
 
 public class Main extends Activity {
 	private static final String requestToken = "https://api.realexpayments.com/IPS-Reporting/oauth/request_token";
@@ -77,10 +78,9 @@ public class Main extends Activity {
 			accessor.accessToken = access_token;
 			accessor.tokenSecret = access_secret;
 
-			if (new ClientTask().execute("") != null) {
-				// null would mean we had an invalid token - don't continue.
-				new TransactionsTask().execute("");
-			}
+			new ClientTask().execute("");
+			new TransactionsTask().execute("");
+			
 		}
 
 		/*
@@ -261,6 +261,8 @@ public class Main extends Activity {
 		protected void onPostExecute(String clientXML) {
 			Log.d("TMS", "In onPoseExecute: " + clientXML);
 
+			if (clientXML == null) { return; }
+			
 			Serializer serializer = new Persister();
 			Reader reader = new StringReader(clientXML);
 			Client client = null;
@@ -276,7 +278,7 @@ public class Main extends Activity {
 		}
 	}
 
-	class TransactionsTask extends AsyncTask<String, Void, String> {
+	class AccountsTask extends AsyncTask<String, Void, String> {
 
 		private Exception exception;
 
@@ -321,6 +323,55 @@ public class Main extends Activity {
 
 			TextView tvAccounts = (TextView) findViewById(R.id.transactions);
 			tvAccounts.setText(ca.account.get(0).accountName);
+		}
+	}
+
+
+	class TransactionsTask extends AsyncTask<String, Void, String> {
+
+		private Exception exception;
+
+		protected String doInBackground(String... urls) {
+			OAuthClient oclient = new OAuthClient(new HttpClient4());
+			OAuthAccessor accessor = defaultAccessor();
+			// Log.d("TMS", "ClientTask: "+ accessor.accessToken + "/" + accessor.tokenSecret);
+
+			try {
+				OAuthMessage omessage = oclient.invoke(accessor, "GET", "https://api.realexpayments.com/IPS-Reporting/api/v1.0/~/search/transactions", null);
+
+				String xml = omessage.readBodyAsString(); // can only read once
+				Log.d("TMS", "Transactions: " + xml);
+
+				return xml;
+
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (OAuthException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (URISyntaxException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return null;
+		}
+
+		protected void onPostExecute(String accountsXML) {
+			// Log.d("TMS", "In onPostExecute: " + accountsXML);
+
+			Serializer serializer = new Persister();
+			Reader reader = new StringReader(accountsXML);
+			Transactions t = null;
+			try {
+				t = serializer.read(Transactions.class, reader, false);
+			} catch (Exception e) {
+				Log.e("TMS", "Crud! " + e.getLocalizedMessage());
+			}
+			Log.d("TMS", "Got Client: " + t.totalNumTransactions + ": " + t.transaction.get(0).orderid);
+
+			TextView tvAccounts = (TextView) findViewById(R.id.transactions);
+			tvAccounts.setText(t.totalNumTransactions + ": " + t.transaction.get(0).orderid);
 		}
 	}
 
