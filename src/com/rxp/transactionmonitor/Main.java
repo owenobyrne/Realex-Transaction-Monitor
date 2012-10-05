@@ -1,8 +1,10 @@
 package com.rxp.transactionmonitor;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +17,7 @@ import net.oauth.OAuthException;
 import net.oauth.OAuthMessage;
 import net.oauth.OAuthProblemException;
 import net.oauth.OAuthServiceProvider;
+import net.oauth.ParameterStyle;
 import net.oauth.client.OAuthClient;
 import net.oauth.client.httpclient4.HttpClient4;
 
@@ -34,6 +37,7 @@ import android.widget.TextView;
 
 import com.rxp.realcontrol.api.Client;
 import com.rxp.realcontrol.api.ClientAccounts;
+import com.rxp.realcontrol.api.Filter;
 import com.rxp.realcontrol.api.Transactions;
 
 public class Main extends Activity {
@@ -336,9 +340,35 @@ public class Main extends Activity {
 			OAuthAccessor accessor = defaultAccessor();
 			// Log.d("TMS", "ClientTask: "+ accessor.accessToken + "/" + accessor.tokenSecret);
 
-			try {
-				OAuthMessage omessage = oclient.invoke(accessor, "GET", "https://api.realexpayments.com/IPS-Reporting/api/v1.0/~/search/transactions", null);
+			Filter filter = new Filter();
+			filter.offset = 0;
+			
+			Filter.DateTime dateTime = new Filter.DateTime();
+			dateTime.dateFrom = "01/10/2012";
+			dateTime.dateTo = "06/10/2012";
+			dateTime.timeFrom = "00:00";
+			dateTime.timeTo = "00:00";
+			filter.dateTime = dateTime;
+			
+			filter.timestamp = "" + System.currentTimeMillis();
 
+			Serializer serializer = new Persister();
+			StringWriter sw = new StringWriter();
+			
+			
+			try {
+				serializer.write(filter, sw);
+				
+				Log.d("TMS", sw.toString());
+				
+				OAuthMessage request = accessor.newRequestMessage(
+						"POST", 
+						"https://api.realexpayments.com/IPS-Reporting/api/v1.0/~/search/transactions", 
+						null, 
+						new ByteArrayInputStream(sw.toString().getBytes())
+				);
+				OAuthMessage omessage = oclient.invoke(request, ParameterStyle.AUTHORIZATION_HEADER);
+				
 				String xml = omessage.readBodyAsString(); // can only read once
 				Log.d("TMS", "Transactions: " + xml);
 
@@ -353,15 +383,18 @@ public class Main extends Activity {
 			} catch (URISyntaxException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 			return null;
 		}
 
-		protected void onPostExecute(String accountsXML) {
-			// Log.d("TMS", "In onPostExecute: " + accountsXML);
+		protected void onPostExecute(String transactionsXML) {
+			Log.d("TMS", "In Transactions.onPostExecute: " + transactionsXML);
 
 			Serializer serializer = new Persister();
-			Reader reader = new StringReader(accountsXML);
+			Reader reader = new StringReader(transactionsXML);
 			Transactions t = null;
 			try {
 				t = serializer.read(Transactions.class, reader, false);
