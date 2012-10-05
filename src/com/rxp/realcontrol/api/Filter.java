@@ -304,16 +304,16 @@ public class Filter {
     public String cardRef;
     
 	@Attribute(required = false)
-    public int max;
+    public Integer max;
     
 	@Attribute(required = false)
-    public int offset;
+    public Integer offset;
     
 	@Attribute(required = false)
     public String searchUuid;
     
 	@Attribute(required = false)
-    public int totalCount;
+    public Integer totalCount;
 
 
     /**

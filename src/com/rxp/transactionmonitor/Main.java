@@ -6,7 +6,9 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URISyntaxException;
+import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -367,6 +369,10 @@ public class Main extends Activity {
 						null, 
 						new ByteArrayInputStream(sw.toString().getBytes())
 				);
+
+				List<Map.Entry<String, String>> headers = request.getHeaders();
+				headers.add(new AbstractMap.SimpleEntry<String, String>("Content-Type", "text/xml"));
+				
 				OAuthMessage omessage = oclient.invoke(request, ParameterStyle.AUTHORIZATION_HEADER);
 				
 				String xml = omessage.readBodyAsString(); // can only read once

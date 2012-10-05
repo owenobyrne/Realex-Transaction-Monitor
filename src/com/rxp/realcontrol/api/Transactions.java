@@ -10,6 +10,7 @@ package com.rxp.realcontrol.api;
 
 import java.util.List;
 
+import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
@@ -91,7 +92,7 @@ public class Transactions {
     public Transactions.CurrentRange currentRange;
     @ElementList(inline=true)
     public List<Transactions.Transaction> transaction;
-    @Element(required = false)
+    @Attribute(required = true)
     public Integer totalNumTransactions;
 
     /**
