@@ -8,7 +8,6 @@ import java.io.StringWriter;
 import java.net.URISyntaxException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,6 +34,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.View;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.TextView;
 
 import com.rxp.realcontrol.api.Client;
@@ -114,6 +116,17 @@ public class Main extends Activity {
 
 	}
 
+	public void loadOAuthLogin(String url) {
+		WebView webview = new WebView(this);
+	    webview.getSettings().setJavaScriptEnabled(true);
+	    webview.setVisibility(View.VISIBLE);
+
+		webview.setWebViewClient(new MyWebViewClient());
+		setContentView(webview);
+
+		webview.loadUrl(url);
+	}
+	
 	public OAuthServiceProvider defaultProvider() {
 		OAuthServiceProvider provider = new OAuthServiceProvider(requestToken, authorize, accessToken);
 		return provider;
@@ -137,15 +150,14 @@ public class Main extends Activity {
 		return accessor;
 	}
 
-	class RetrieveRequestTokenTask extends AsyncTask<String, Void, Void> {
+	class RetrieveRequestTokenTask extends AsyncTask<String, Void, String> {
 
 		private Exception exception;
 
-		protected Void doInBackground(String... urls) {
+		protected String doInBackground(String... urls) {
 			OAuthAccessor accessor = defaultAccessor();
 
 			OAuthClient oclient = new OAuthClient(new HttpClient4());
-			Intent intent = new Intent(Intent.ACTION_VIEW);
 			List<Map.Entry<String, String>> params = new ArrayList<Map.Entry<String, String>>();
 			params.add(new OAuth.Parameter("oauth_callback", accessor.consumer.callbackURL));
 
@@ -160,7 +172,7 @@ public class Main extends Activity {
 				edit.commit();
 
 				Log.d("TMS", "In RetrieveRequestTokenTask: " + accessor.requestToken + "/" + accessor.tokenSecret);
-				intent.setData(Uri.parse(accessor.consumer.serviceProvider.userAuthorizationURL + "?oauth_token=" + accessor.requestToken));
+				return accessor.consumer.serviceProvider.userAuthorizationURL + "?oauth_token=" + accessor.requestToken;
 
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -172,11 +184,11 @@ public class Main extends Activity {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			startActivity(intent);
 			return null;
 		}
 
-		protected void onPostExecute() {
+		protected void onPostExecute(String url) {
+			loadOAuthLogin(url);
 			// TODO: check this.exception
 			// TODO: do something with the feed
 		}
@@ -413,5 +425,13 @@ public class Main extends Activity {
 			tvAccounts.setText(t.totalNumTransactions + ": " + t.transaction.get(0).orderid);
 		}
 	}
+	
+	private class MyWebViewClient extends WebViewClient {
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            view.loadUrl(url);
+            return true;
+        }
+    }    
 
 }
