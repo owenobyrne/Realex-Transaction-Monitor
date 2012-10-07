@@ -20,6 +20,8 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
+import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -47,6 +49,8 @@ public class OAuthLoginActivity extends Activity {
 		super.onResume();
 
 		webview = new WebView(this);
+		CookieManager.getInstance().setAcceptCookie(false);
+
 		webview.getSettings().setJavaScriptEnabled(true);
 		webview.setVisibility(View.VISIBLE);
 		setContentView(webview);
@@ -61,23 +65,12 @@ public class OAuthLoginActivity extends Activity {
 		webview.setWebViewClient(new WebViewClient() {
 			@Override
 			public boolean shouldOverrideUrlLoading(WebView view, String url) {
-				view.loadUrl(url);
-				return true;
-			}
-
-			@Override
-			public void onPageStarted(WebView view, String url, Bitmap bitmap) {
-				Log.i("TMS", "onPageStarted : " + url);
-			}
-
-			@Override
-			public void onPageFinished(WebView view, String url) {
-
+				
 				if (url.startsWith(OAuthHelper.callbackURL)) {
 					try {
 						Uri cbu = Uri.parse(url);
 						if (url.indexOf("oauth_token=") != -1) {
-
+							view.setVisibility(View.GONE);
 							String authorised_request_token = cbu
 									.getQueryParameter("oauth_token");
 							String verifier = cbu
@@ -86,8 +79,9 @@ public class OAuthLoginActivity extends Activity {
 							Log.d("TMS", "Blessed Request Credentials: "
 									+ authorised_request_token + "/" + verifier);
 
-							new SwapAccessTokenTask().execute(authorised_request_token, verifier);
-							
+							new SwapAccessTokenTask().execute(
+									authorised_request_token, verifier);
+
 						} else if (url.indexOf("error=") != -1) {
 							view.setVisibility(View.INVISIBLE);
 							Editor edit = preferences.edit();
@@ -97,14 +91,22 @@ public class OAuthLoginActivity extends Activity {
 							startActivity(new Intent(OAuthLoginActivity.this,
 									RealControlActivity.class));
 						}
-
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
 
-				}
-				Log.i("TMS", "onPageFinished : " + url);
+				} else {
+					view.loadUrl(url);
 
+				}
+
+
+				return true;
+			}
+
+			@Override
+			public void onPageStarted(WebView view, String url, Bitmap bitmap) {
+				Log.i("TMS", "onPageStarted : " + url);
 			}
 
 		});
@@ -133,6 +135,10 @@ public class OAuthLoginActivity extends Activity {
 
 				Log.d("TMS", "In RetrieveRequestTokenTask: "
 						+ accessor.requestToken + "/" + accessor.tokenSecret);
+				
+				request_token = accessor.requestToken;
+				request_secret = accessor.tokenSecret;
+				
 				url = accessor.consumer.serviceProvider.userAuthorizationURL
 						+ "?oauth_token=" + accessor.requestToken;
 

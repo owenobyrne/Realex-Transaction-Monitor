@@ -153,7 +153,6 @@ public class RealControlActivity extends Activity {
 
 		protected String doInBackground(String... urls) {
 			OAuthClient oclient = new OAuthClient(new HttpClient4());
-			accessor = OAuthHelper.defaultAccessor();
 			// Log.d("TMS", "ClientTask: "+ accessor.accessToken + "/" +
 			// accessor.tokenSecret);
 
@@ -204,7 +203,6 @@ public class RealControlActivity extends Activity {
 
 		protected String doInBackground(String... urls) {
 			OAuthClient oclient = new OAuthClient(new HttpClient4());
-			accessor = OAuthHelper.defaultAccessor();
 			// Log.d("TMS", "ClientTask: "+ accessor.accessToken + "/" +
 			// accessor.tokenSecret);
 
@@ -213,7 +211,7 @@ public class RealControlActivity extends Activity {
 
 			Filter.DateTime dateTime = new Filter.DateTime();
 			dateTime.dateFrom = "01/10/2012";
-			dateTime.dateTo = "06/10/2012";
+			dateTime.dateTo = "02/10/2012";
 			dateTime.timeFrom = "00:00";
 			dateTime.timeTo = "00:00";
 			filter.dateTime = dateTime;
