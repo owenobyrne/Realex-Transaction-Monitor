@@ -41,19 +41,21 @@
 			</intent-filter> 
 		</activity>
         <activity
-            android:name=".Main"
+            android:name=".activities.RealControlActivity"
             android:label="@string/title_activity_main" >
             <intent-filter>
-                <action android:name="com.rxp.transactionmonitor.Main" />
+                <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-		    <intent-filter>
-		         <action android:name="android.intent.action.VIEW" />
-		         <category android:name="android.intent.category.DEFAULT" />
-		         <category android:name="android.intent.category.BROWSABLE" />
-		         <data android:scheme="realex-android-app"/>
-		     </intent-filter>
         </activity>
+        
+        <activity android:name=".activities.OAuthLoginActivity" android:launchMode="singleTask">>
+			<intent-filter>
+				<action android:name="android.intent.action.VIEW" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<category android:name="android.intent.category.BROWSABLE" />
+			</intent-filter>
+		</activity>
         
         <service android:name=".GCMIntentService" />
         

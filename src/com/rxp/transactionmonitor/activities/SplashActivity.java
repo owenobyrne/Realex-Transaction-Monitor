@@ -39,7 +39,8 @@ public class SplashActivity extends Activity {
 				} finally {
 					finish();
 					startActivity(new Intent(
-							"com.rxp.transactionmonitor.Main"));
+							SplashActivity.this,
+							RealControlActivity.class));
 					
 				}
 			}
