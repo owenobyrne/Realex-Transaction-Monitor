@@ -12,7 +12,7 @@ import com.rxp.transactionmonitor.R;
 public class SplashActivity extends Activity {
 
 	protected boolean _active = true;
-	protected int _splashTime = 5000;
+	protected int _splashTime = 3000;
 
 	/** Called when the activity is first created. */
 	@Override

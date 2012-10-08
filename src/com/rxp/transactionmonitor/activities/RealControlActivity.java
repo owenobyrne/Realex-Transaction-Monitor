@@ -87,8 +87,8 @@ public class RealControlActivity extends Activity {
 
 		protected String doInBackground(String... urls) {
 			OAuthClient oclient = new OAuthClient(new HttpClient4());
-			// Log.d("TMS", "ClientTask: "+ accessor.accessToken + "/" +
-			// accessor.tokenSecret);
+			 Log.d("TMS", "ClientTask: "+ accessor.accessToken + "/" +
+			 accessor.tokenSecret);
 
 			try {
 				OAuthMessage omessage = oclient
