@@ -186,8 +186,8 @@ public class OAuthLoginActivity extends Activity {
 			return null;
 		}
 
-		protected void onPostExecute(String url) {
-			webview.setVisibility(View.INVISIBLE);
+		protected void onPostExecute(Void v) {
+			Log.i("TMS", "in postexecute for swap");
 			startActivity(new Intent(OAuthLoginActivity.this,
 					RealControlActivity.class));
 
