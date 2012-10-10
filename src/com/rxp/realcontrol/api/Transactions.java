@@ -144,10 +144,10 @@ public class Transactions {
 
     @Root
     public static class NextRange {
-    	@Element(required = false)
-    	public int offset;
-    	@Element(required = false)
-    	public int max;
+    	@Attribute
+    	public Integer offset;
+    	@Attribute
+    	public Integer max;
     }
 
 
@@ -222,6 +222,10 @@ public class Transactions {
     	public String eci;
     	@Element(required = false)
     	public String fraudScore;
+    	
+    	public String toString() {
+    		return name + " (" + amount + " " + currency + ")";
+    	}
 
     }
 }

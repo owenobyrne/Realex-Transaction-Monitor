@@ -1,20 +1,15 @@
 package com.rxp.transactionmonitor.activities;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
-import java.io.StringWriter;
 import java.net.URISyntaxException;
-import java.util.AbstractMap;
-import java.util.List;
-import java.util.Map;
+import java.util.ArrayList;
 
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthException;
 import net.oauth.OAuthMessage;
 import net.oauth.OAuthProblemException;
-import net.oauth.ParameterStyle;
 import net.oauth.client.OAuthClient;
 import net.oauth.client.httpclient4.HttpClient4;
 
@@ -29,6 +24,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.rxp.realcontrol.api.Client;
@@ -37,8 +33,11 @@ import com.rxp.realcontrol.api.Filter;
 import com.rxp.realcontrol.api.Transactions;
 import com.rxp.transactionmonitor.OAuthHelper;
 import com.rxp.transactionmonitor.R;
+import com.rxp.transactionmonitor.TransactionListAdapter;
+import com.rxp.transactionmonitor.listeners.TransactionsListener;
+import com.rxp.transactionmonitor.tasks.GetTransactionsTask;
 
-public class RealControlActivity extends Activity {
+public class RealControlActivity extends Activity implements TransactionsListener {
 	SharedPreferences preferences;
 	OAuthAccessor accessor;
 
@@ -46,10 +45,12 @@ public class RealControlActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		ListView lv = (ListView)findViewById(R.id.list);
+		
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		String access_token = preferences.getString("access_token", "");
 		String access_secret = preferences.getString("access_secret", "");
-
+		
 		Log.d("TMS", "In onCreate: " + access_token + "/" + access_secret);
 
 		if (access_token.equals("")) {
@@ -63,9 +64,21 @@ public class RealControlActivity extends Activity {
 			accessor.accessToken = access_token;
 			accessor.tokenSecret = access_secret;
 
+			TransactionListAdapter adapter=(TransactionListAdapter)lv.getAdapter();
+		    
+		    if (adapter==null) {
+		      ArrayList<Transactions.Transaction> items=new ArrayList<Transactions.Transaction>();
+		      adapter=new TransactionListAdapter(getBaseContext(), items, accessor);
+		    }
+		    else {
+		      adapter.startProgressAnimation();
+		    }
+		    
+		    lv.setAdapter(adapter);
+		    
 			new ClientTask().execute("");
-			new TransactionsTask().execute("");
-
+			
+		
 		}
 
 		/*
@@ -199,86 +212,13 @@ public class RealControlActivity extends Activity {
 		}
 	}
 
-	class TransactionsTask extends AsyncTask<String, Void, String> {
+	@Override
+	public void setTransaction(Transactions t) {
+		TextView tvT = (TextView) findViewById(R.id.transactions);
+		tvT.setText(t.totalNumTransactions + ": "
+				+ t.transaction.get(0).orderid);
 
-		protected String doInBackground(String... urls) {
-			OAuthClient oclient = new OAuthClient(new HttpClient4());
-			// Log.d("TMS", "ClientTask: "+ accessor.accessToken + "/" +
-			// accessor.tokenSecret);
-
-			Filter filter = new Filter();
-			filter.offset = 0;
-
-			Filter.DateTime dateTime = new Filter.DateTime();
-			dateTime.dateFrom = "01/10/2012";
-			dateTime.dateTo = "02/10/2012";
-			dateTime.timeFrom = "00:00";
-			dateTime.timeTo = "00:00";
-			filter.dateTime = dateTime;
-
-			filter.timestamp = "" + System.currentTimeMillis();
-
-			Serializer serializer = new Persister();
-			StringWriter sw = new StringWriter();
-
-			try {
-				serializer.write(filter, sw);
-
-				Log.d("TMS", sw.toString());
-
-				OAuthMessage request = accessor
-						.newRequestMessage(
-								"POST",
-								"https://api.realexpayments.com/IPS-Reporting/api/v1.0/~/search/transactions",
-								null, new ByteArrayInputStream(sw.toString()
-										.getBytes()));
-
-				List<Map.Entry<String, String>> headers = request.getHeaders();
-				headers.add(new AbstractMap.SimpleEntry<String, String>(
-						"Content-Type", "text/xml"));
-
-				OAuthMessage omessage = oclient.invoke(request,
-						ParameterStyle.AUTHORIZATION_HEADER);
-
-				String xml = omessage.readBodyAsString(); // can only read once
-				Log.d("TMS", "Transactions: " + xml);
-
-				return xml;
-
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (OAuthException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (URISyntaxException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return null;
-		}
-
-		protected void onPostExecute(String transactionsXML) {
-			Log.d("TMS", "In Transactions.onPostExecute: " + transactionsXML);
-
-			Serializer serializer = new Persister();
-			Reader reader = new StringReader(transactionsXML);
-			Transactions t = null;
-			try {
-				t = serializer.read(Transactions.class, reader, false);
-			} catch (Exception e) {
-				Log.e("TMS", "Crud! " + e.getLocalizedMessage());
-			}
-			Log.d("TMS", "Got Client: " + t.totalNumTransactions + ": "
-					+ t.transaction.get(0).orderid);
-
-			TextView tvAccounts = (TextView) findViewById(R.id.transactions);
-			tvAccounts.setText(t.totalNumTransactions + ": "
-					+ t.transaction.get(0).orderid);
-		}
 	}
+
 
 }
