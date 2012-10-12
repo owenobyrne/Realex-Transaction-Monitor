@@ -11,6 +11,7 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.rxp.realcontrol.api.Transactions;
+import com.rxp.transactionmonitor.views.RTMListItemView;
 
 public class TransactionArrayAdapter extends
 		ArrayAdapter<Transactions.Transaction> {
@@ -37,13 +38,10 @@ public class TransactionArrayAdapter extends
 		}
 		Transactions.Transaction t = items.get(position);
 		if (t != null) {
-			TextView t1 = (TextView) v.findViewById(R.id.text1);
-			TextView t2 = (TextView) v.findViewById(R.id.text2);
-			if (t1 != null) {
-				t1.setText("Name: " + t.name);
-			}
-			if (t2 != null) {
-				t2.setText("Amount: " + t.amount);
+			RTMListItemView liv = (RTMListItemView) v.findViewById(R.id.liv);
+			if (liv != null) {
+				liv.setTopLine(t.name);
+				liv.setSubLine(t.orderid);
 			}
 		} else {
 			Log.i("TransactionAdapter", "object is NULL");

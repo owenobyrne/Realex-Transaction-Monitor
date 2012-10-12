@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout android:id="@+id/LinearLayout01" android:layout_width="fill_parent" android:orientation="vertical"
-     android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android"
-     xmlns:rxp="http://schemas.android.com/apk/res/com.rxp.transactionmonitor">
+     android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android">
 
     <TextView
         android:id="@+id/clientId"
@@ -18,21 +17,9 @@
     <ListView
   android:id="@+id/list"
   android:layout_width="match_parent" 
-  android:layout_height="wrap_content"
+  android:layout_height="match_parent"
   android:drawSelectorOnTop="false"
 />
-    
-    <!-- 
-    <com.rxp.transactionmonitor.views.RTMListItemView
-	android:id="@+id/liv"
-	android:layout_width="fill_parent"
-	android:layout_height="316dip"
-	android:focusable="true"
-	android:focusableInTouchMode="true"
-	android:layout_weight="1"
-	rxp:topLine="Owen O Byrne"
-	rxp:subLine="ORD-32748932-3947"
-	/>
- -->
+
    
 </LinearLayout>

@@ -44,9 +44,7 @@ public class TransactionListAdapter extends EndlessAdapter implements
 		View row = LayoutInflater.from(parent.getContext()).inflate(
 				R.layout.row, null);
 
-		pendingView = row.findViewById(R.id.text1);
-		pendingView.setVisibility(View.GONE);
-		pendingView = row.findViewById(R.id.text2);
+		pendingView = row.findViewById(R.id.liv);
 		pendingView.setVisibility(View.GONE);
 		pendingView = row.findViewById(R.id.throbber);
 		pendingView.setVisibility(View.VISIBLE);
