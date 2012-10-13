@@ -23,13 +23,15 @@ public class TransactionListAdapter extends EndlessAdapter implements
 	private OAuthAccessor accessor;
 	private int nextOffset = 0;
 	private int totalNumTransactions = 0;
+	private Filter filter;
 
 	public TransactionListAdapter(Context ctxt,
-			ArrayList<Transactions.Transaction> list, OAuthAccessor accessor) {
+			ArrayList<Transactions.Transaction> list, Filter f, OAuthAccessor accessor) {
 		super(new TransactionArrayAdapter(ctxt, R.layout.row, list));
 
 		setRunInBackground(false);
 
+		this.filter = f;
 		this.accessor = accessor;
 
 		rotate = new RotateAnimation(0f, 360f, Animation.RELATIVE_TO_SELF,
@@ -55,16 +57,8 @@ public class TransactionListAdapter extends EndlessAdapter implements
 
 	@Override
 	protected boolean cacheInBackground() {
-		Filter filter = new Filter();
+		
 		filter.offset = nextOffset;
-
-		Filter.DateTime dateTime = new Filter.DateTime();
-		dateTime.dateFrom = "01/10/2012";
-		dateTime.dateTo = "02/10/2012";
-		dateTime.timeFrom = "00:00";
-		dateTime.timeTo = "00:00";
-		filter.dateTime = dateTime;
-
 		filter.timestamp = "" + System.currentTimeMillis();
 
 		new GetTransactionsTask().getTransactions(accessor, filter, this);

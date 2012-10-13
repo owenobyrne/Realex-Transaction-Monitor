@@ -4,6 +4,7 @@
     <declare-styleable name="RTMListItem">
         <attr name="topLine" format="string" />
         <attr name="subLine" format="string" />
+        <attr name="timestamp" format="string" />
     </declare-styleable>
 
 </resources>

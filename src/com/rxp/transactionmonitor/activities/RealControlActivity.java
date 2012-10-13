@@ -4,7 +4,10 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.URISyntaxException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthException;
@@ -35,11 +38,14 @@ import com.rxp.transactionmonitor.OAuthHelper;
 import com.rxp.transactionmonitor.R;
 import com.rxp.transactionmonitor.TransactionListAdapter;
 import com.rxp.transactionmonitor.listeners.TransactionsListener;
-import com.rxp.transactionmonitor.tasks.GetTransactionsTask;
 
 public class RealControlActivity extends Activity implements TransactionsListener {
 	SharedPreferences preferences;
 	OAuthAccessor accessor;
+	SimpleDateFormat sdf_date = new SimpleDateFormat("dd/MM/yyyy");
+	SimpleDateFormat sdf_time = new SimpleDateFormat("HH:mm");
+	
+	
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -67,8 +73,21 @@ public class RealControlActivity extends Activity implements TransactionsListene
 			TransactionListAdapter adapter=(TransactionListAdapter)lv.getAdapter();
 		    
 		    if (adapter==null) {
+				Filter filter = new Filter();
+				Calendar c = Calendar.getInstance();
+				c.setTime(new Date());
+				c.add(Calendar.DATE, -1);
+				
+				Filter.DateTime dateTime = new Filter.DateTime();
+				dateTime.dateFrom = sdf_date.format(c.getTime());
+				dateTime.timeFrom = "00:00";
+				
+				dateTime.dateTo = sdf_date.format(new Date());
+				dateTime.timeTo = sdf_time.format(new Date());
+				filter.dateTime = dateTime;
+
 		      ArrayList<Transactions.Transaction> items=new ArrayList<Transactions.Transaction>();
-		      adapter=new TransactionListAdapter(getBaseContext(), items, accessor);
+		      adapter=new TransactionListAdapter(getBaseContext(), items, filter, accessor);
 		    }
 		    else {
 		      adapter.startProgressAnimation();
