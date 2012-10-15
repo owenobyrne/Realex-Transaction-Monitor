@@ -4,6 +4,6 @@ import com.rxp.realcontrol.api.Transactions;
 
 public interface TransactionsListener {
 
-	public void setTransaction(Transactions t);
-	
+	public void onMoreTransactions(Transactions t);
+	public void onRefreshTransactions(Transactions t);
 }

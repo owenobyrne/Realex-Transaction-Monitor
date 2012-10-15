@@ -27,6 +27,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.widget.HeaderViewListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -40,36 +41,22 @@ import com.rxp.realcontrol.api.Transactions;
 import com.rxp.transactionmonitor.OAuthHelper;
 import com.rxp.transactionmonitor.R;
 import com.rxp.transactionmonitor.TransactionListAdapter;
-import com.rxp.transactionmonitor.listeners.TransactionsListener;
 
-public class RealControlActivity extends Activity implements TransactionsListener {
+public class RealControlActivity extends Activity {
 	SharedPreferences preferences;
 	OAuthAccessor accessor;
-	SimpleDateFormat sdf_date = new SimpleDateFormat("dd/MM/yyyy");
-	SimpleDateFormat sdf_time = new SimpleDateFormat("HH:mm");
-	PullToRefreshListView pullToRefreshView;
-	
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
-		pullToRefreshView = (PullToRefreshListView) findViewById(R.id.list);
-		pullToRefreshView.setOnRefreshListener(new OnRefreshListener<ListView>() {
-		    @Override
-		    public void onRefresh(PullToRefreshBase<ListView> refreshView) {
-		        // Do work to refresh the list here.
-		        new GetDataTask().execute();
-		    }
-		});
 
 		
-		
+
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		String access_token = preferences.getString("access_token", "");
 		String access_secret = preferences.getString("access_secret", "");
-		
+
 		Log.d("TMS", "In onCreate: " + access_token + "/" + access_secret);
 
 		if (access_token.equals("")) {
@@ -83,34 +70,14 @@ public class RealControlActivity extends Activity implements TransactionsListene
 			accessor.accessToken = access_token;
 			accessor.tokenSecret = access_secret;
 
-			TransactionListAdapter adapter=(TransactionListAdapter)pullToRefreshView.getRefreshableView().getAdapter();
-		    
-		    if (adapter==null) {
-				Filter filter = new Filter();
-				Calendar c = Calendar.getInstance();
-				c.setTime(new Date());
-				c.add(Calendar.DATE, -1);
-				
-				Filter.DateTime dateTime = new Filter.DateTime();
-				dateTime.dateFrom = sdf_date.format(c.getTime());
-				dateTime.timeFrom = "00:00";
-				
-				dateTime.dateTo = sdf_date.format(new Date());
-				dateTime.timeTo = sdf_time.format(new Date());
-				filter.dateTime = dateTime;
-
-		      ArrayList<Transactions.Transaction> items=new ArrayList<Transactions.Transaction>();
-		      adapter=new TransactionListAdapter(getBaseContext(), items, filter, accessor);
-		    }
-		    else {
-		      adapter.startProgressAnimation();
-		    }
-		    
-		    pullToRefreshView.setAdapter(adapter);
-		    
-			new ClientTask().execute("");
+			TransactionListAdapter adapter = new TransactionListAdapter(getBaseContext(), accessor);
 			
-		
+			PullToRefreshListView pullToRefreshView = (PullToRefreshListView) findViewById(R.id.list);
+			pullToRefreshView.getRefreshableView().setAdapter(adapter);
+			pullToRefreshView.setOnRefreshListener(adapter);
+			
+			new ClientTask().execute("");
+
 		}
 
 		/*
@@ -128,29 +95,12 @@ public class RealControlActivity extends Activity implements TransactionsListene
 
 	}
 
-	
-	class GetDataTask extends AsyncTask<Void, Void, String[]> {
-	 
-	    @Override
-	    protected void onPostExecute(String[] result) {
-	        // Call onRefreshComplete when the list has been refreshed.
-	        pullToRefreshView.onRefreshComplete();
-	        super.onPostExecute(result);
-	    }
-
-		@Override
-		protected String[] doInBackground(Void... arg0) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-	}
-	
 	class ClientTask extends AsyncTask<String, Void, String> {
 
 		protected String doInBackground(String... urls) {
 			OAuthClient oclient = new OAuthClient(new HttpClient4());
-			 Log.d("TMS", "ClientTask: "+ accessor.accessToken + "/" +
-			 accessor.tokenSecret);
+			Log.d("TMS", "ClientTask: " + accessor.accessToken + "/"
+					+ accessor.tokenSecret);
 
 			try {
 				OAuthMessage omessage = oclient
@@ -260,14 +210,5 @@ public class RealControlActivity extends Activity implements TransactionsListene
 			tvAccounts.setText(ca.account.get(0).accountName);
 		}
 	}
-
-	@Override
-	public void setTransaction(Transactions t) {
-		TextView tvT = (TextView) findViewById(R.id.transactions);
-		tvT.setText(t.totalNumTransactions + ": "
-				+ t.transaction.get(0).orderid);
-
-	}
-
 
 }

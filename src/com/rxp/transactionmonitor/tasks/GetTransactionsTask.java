@@ -29,6 +29,7 @@ import com.rxp.transactionmonitor.listeners.TransactionsListener;
 
 public class GetTransactionsTask extends AsyncTask<Object, Void, String> {
 	TransactionsListener tl; 
+	boolean refreshList = false;
 	
 	/**
 	 * Helper method to aid code completion mostly. Better than guessing which Objects need
@@ -38,7 +39,8 @@ public class GetTransactionsTask extends AsyncTask<Object, Void, String> {
 	 * @param filter A filter to apply to the transaction search
 	 * @param tl A TransactionsListener to return the results to. 
 	 */
-	public void getTransactions(OAuthAccessor accessor, Filter filter, TransactionsListener tl) {
+	public void getTransactions(OAuthAccessor accessor, Filter filter, boolean refreshList, TransactionsListener tl) {
+		this.refreshList = refreshList;
 		this.execute(accessor, filter, tl);
 	}
 	
@@ -104,6 +106,10 @@ public class GetTransactionsTask extends AsyncTask<Object, Void, String> {
 			Log.e("TMS", "Crud! " + e.getLocalizedMessage());
 		}
 		
-		tl.setTransaction(t);
+		if (refreshList) {
+			tl.onRefreshTransactions(t);
+		} else {
+			tl.onMoreTransactions(t);
+		}
 	}
 }
