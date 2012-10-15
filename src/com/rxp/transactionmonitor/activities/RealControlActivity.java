@@ -30,6 +30,9 @@ import android.util.Log;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.handmark.pulltorefresh.library.PullToRefreshBase;
+import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener;
+import com.handmark.pulltorefresh.library.PullToRefreshListView;
 import com.rxp.realcontrol.api.Client;
 import com.rxp.realcontrol.api.ClientAccounts;
 import com.rxp.realcontrol.api.Filter;
@@ -44,14 +47,24 @@ public class RealControlActivity extends Activity implements TransactionsListene
 	OAuthAccessor accessor;
 	SimpleDateFormat sdf_date = new SimpleDateFormat("dd/MM/yyyy");
 	SimpleDateFormat sdf_time = new SimpleDateFormat("HH:mm");
-	
+	PullToRefreshListView pullToRefreshView;
 	
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		ListView lv = (ListView)findViewById(R.id.list);
+		
+		pullToRefreshView = (PullToRefreshListView) findViewById(R.id.list);
+		pullToRefreshView.setOnRefreshListener(new OnRefreshListener<ListView>() {
+		    @Override
+		    public void onRefresh(PullToRefreshBase<ListView> refreshView) {
+		        // Do work to refresh the list here.
+		        new GetDataTask().execute();
+		    }
+		});
+
+		
 		
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		String access_token = preferences.getString("access_token", "");
@@ -70,7 +83,7 @@ public class RealControlActivity extends Activity implements TransactionsListene
 			accessor.accessToken = access_token;
 			accessor.tokenSecret = access_secret;
 
-			TransactionListAdapter adapter=(TransactionListAdapter)lv.getAdapter();
+			TransactionListAdapter adapter=(TransactionListAdapter)pullToRefreshView.getRefreshableView().getAdapter();
 		    
 		    if (adapter==null) {
 				Filter filter = new Filter();
@@ -93,7 +106,7 @@ public class RealControlActivity extends Activity implements TransactionsListene
 		      adapter.startProgressAnimation();
 		    }
 		    
-		    lv.setAdapter(adapter);
+		    pullToRefreshView.setAdapter(adapter);
 		    
 			new ClientTask().execute("");
 			
@@ -115,6 +128,23 @@ public class RealControlActivity extends Activity implements TransactionsListene
 
 	}
 
+	
+	class GetDataTask extends AsyncTask<Void, Void, String[]> {
+	 
+	    @Override
+	    protected void onPostExecute(String[] result) {
+	        // Call onRefreshComplete when the list has been refreshed.
+	        pullToRefreshView.onRefreshComplete();
+	        super.onPostExecute(result);
+	    }
+
+		@Override
+		protected String[] doInBackground(Void... arg0) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+	}
+	
 	class ClientTask extends AsyncTask<String, Void, String> {
 
 		protected String doInBackground(String... urls) {
